@@ -81,7 +81,8 @@ async def langgraph_multi_agent(
     session_id: str,
     text_model: ModelInfo,
     tool_list: List[ToolInfoJson],
-    system_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None,
+    access_token: Optional[str] = None
 ) -> None:
     """多智能体处理函数
 
@@ -98,7 +99,7 @@ async def langgraph_multi_agent(
         fixed_messages = _fix_chat_history(messages)
         
         # 2. 文本模型
-        text_model_instance = _create_text_model(text_model)
+        text_model_instance = _create_text_model(text_model, access_token)
 
         # 3. 创建智能体
         agents = AgentManager.create_agents(
@@ -135,12 +136,12 @@ async def langgraph_multi_agent(
         await _handle_error(e, session_id)
 
 
-def _create_text_model(text_model: ModelInfo) -> Any:
+def _create_text_model(text_model: ModelInfo, access_token: Optional[str] = None) -> Any:
     """创建语言模型实例"""
     model = text_model.get('model')
     provider = text_model.get('provider')
     url = text_model.get('url')
-    api_key = config_service.app_config.get(  # type: ignore
+    api_key = access_token if access_token else config_service.app_config.get(  # type: ignore
         provider, {}).get("api_key", "")
 
     # TODO: Verify if max token is working

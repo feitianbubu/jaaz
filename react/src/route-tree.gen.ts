@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as KnowledgeImport } from './routes/knowledge'
 import { Route as AgentstudioImport } from './routes/agent_studio'
+import { Route as R99uCallbackImport } from './routes/99u-callback'
 import { Route as IndexImport } from './routes/index'
 import { Route as CanvasIdImport } from './routes/canvas.$id'
 
@@ -27,6 +28,12 @@ const KnowledgeRoute = KnowledgeImport.update({
 const AgentstudioRoute = AgentstudioImport.update({
   id: '/agent_studio',
   path: '/agent_studio',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const R99uCallbackRoute = R99uCallbackImport.update({
+  id: '/99u-callback',
+  path: '/99u-callback',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -51,6 +58,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/99u-callback': {
+      id: '/99u-callback'
+      path: '/99u-callback'
+      fullPath: '/99u-callback'
+      preLoaderRoute: typeof R99uCallbackImport
       parentRoute: typeof rootRoute
     }
     '/agent_studio': {
@@ -81,6 +95,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/99u-callback': typeof R99uCallbackRoute
   '/agent_studio': typeof AgentstudioRoute
   '/knowledge': typeof KnowledgeRoute
   '/canvas/$id': typeof CanvasIdRoute
@@ -88,6 +103,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/99u-callback': typeof R99uCallbackRoute
   '/agent_studio': typeof AgentstudioRoute
   '/knowledge': typeof KnowledgeRoute
   '/canvas/$id': typeof CanvasIdRoute
@@ -96,6 +112,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/99u-callback': typeof R99uCallbackRoute
   '/agent_studio': typeof AgentstudioRoute
   '/knowledge': typeof KnowledgeRoute
   '/canvas/$id': typeof CanvasIdRoute
@@ -103,15 +120,27 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/agent_studio' | '/knowledge' | '/canvas/$id'
+  fullPaths:
+    | '/'
+    | '/99u-callback'
+    | '/agent_studio'
+    | '/knowledge'
+    | '/canvas/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agent_studio' | '/knowledge' | '/canvas/$id'
-  id: '__root__' | '/' | '/agent_studio' | '/knowledge' | '/canvas/$id'
+  to: '/' | '/99u-callback' | '/agent_studio' | '/knowledge' | '/canvas/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/99u-callback'
+    | '/agent_studio'
+    | '/knowledge'
+    | '/canvas/$id'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R99uCallbackRoute: typeof R99uCallbackRoute
   AgentstudioRoute: typeof AgentstudioRoute
   KnowledgeRoute: typeof KnowledgeRoute
   CanvasIdRoute: typeof CanvasIdRoute
@@ -119,6 +148,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R99uCallbackRoute: R99uCallbackRoute,
   AgentstudioRoute: AgentstudioRoute,
   KnowledgeRoute: KnowledgeRoute,
   CanvasIdRoute: CanvasIdRoute,
@@ -135,6 +165,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/99u-callback",
         "/agent_studio",
         "/knowledge",
         "/canvas/$id"
@@ -142,6 +173,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/99u-callback": {
+      "filePath": "99u-callback.tsx"
     },
     "/agent_studio": {
       "filePath": "agent_studio.tsx"

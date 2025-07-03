@@ -21,7 +21,10 @@ async def chat(request: Request):
     Response:
         {"status": "done"}
     """
+    access_token = request.headers.get("Authorization")
+    print(f"[chat_router] Received Authorization header: {access_token}")
     data = await request.json()
+    data['access_token'] = access_token
     await handle_chat(data)
     return {"status": "done"}
 

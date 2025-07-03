@@ -2,6 +2,7 @@
 import UpdateNotificationDialog from '@/components/common/UpdateNotificationDialog'
 import SettingsDialog from '@/components/settings/dialog'
 import { LoginDialog } from '@/components/auth/LoginDialog'
+import { Login99uDialog } from '@/components/auth/Login99uDialog'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { ConfigsProvider } from '@/contexts/configs'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -11,7 +12,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { openDB } from 'idb'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Toaster } from 'sonner'
 import { routeTree } from './route-tree.gen'
 
@@ -66,6 +67,8 @@ const queryClient = new QueryClient({
 
 function App() {
   const { theme } = useTheme()
+  const [showLogin99u, setShowLogin99u] = useState(false)
+  const buildTag = import.meta.env.VITE_BUILD_TAG
 
   // Auto-start ComfyUI on app startup
   useEffect(() => {
@@ -120,6 +123,16 @@ function App() {
 
               {/* Login Dialog */}
               <LoginDialog />
+
+              {/* 99u Login Dialog */}
+              <Login99uDialog open={showLogin99u} onClose={() => setShowLogin99u(false)} onLoginSuccess={() => setShowLogin99u(false)} />
+
+              {/* Build version tag at bottom right */}
+              {buildTag && (
+                <div style={{ position: 'fixed', right: 12, bottom: 8, fontSize: 12, color: '#888', zIndex: 9999 }}>
+                  Build: {buildTag}
+                </div>
+              )}
             </div>
           </ConfigsProvider>
         </AuthProvider>

@@ -24,7 +24,12 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
+    preview: {
+      allowedHosts: ['jaaz.clinx.work']
+    },
     server: {
+      allowedHosts: ['jaaz.clinx.work'],
+      host: '127.0.0.1',
       port: 5174,
       proxy: {},
     },

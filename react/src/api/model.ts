@@ -1,3 +1,5 @@
+import { getAccessToken } from './auth'
+
 export type ModelInfo = {
   provider: string
   model: string
@@ -16,7 +18,14 @@ export async function listModels(): Promise<{
   llm: ModelInfo[]
   tools: ToolInfo[]
 }> {
-  const modelsResp = await fetch('/api/list_models')
+  const token = getAccessToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const modelsResp = await fetch('/api/list_models', {
+    headers
+  })
     .then((res) => res.json())
     .catch((err) => {
       console.error(err)

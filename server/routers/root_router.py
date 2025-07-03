@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 import requests
 import httpx
 from models.tool_model import ToolInfoJson
@@ -9,7 +9,7 @@ from services.db_service import db_service
 from utils.http_client import HttpClient
 # services
 from models.config_model import ModelInfo
-from typing import List
+from typing import List, Dict, Any
 from services.tool_service import TOOL_MAPPING
 
 router = APIRouter(prefix="/api")
@@ -48,8 +48,8 @@ async def get_comfyui_model_list(base_url: str) -> List[str]:
         return []
 
 # List all LLM models
-@router.get("/list_models")
-async def get_models() -> list[ModelInfo]:
+@router.get("/list_models_old")
+async def get_models_old() -> list[ModelInfo]:
     config = config_service.get_config()
     res: List[ModelInfo] = []
 
@@ -92,6 +92,38 @@ async def get_models() -> list[ModelInfo]:
                     'type': model_type
                 })
     return res
+
+# 新的 /list_models 接口，专为 clinx
+@router.get("/list_models")
+async def get_models(request: Request) -> List[Dict[str, Any]]:
+    token = request.headers.get("Authorization", "").strip()
+    if not token:
+        return []
+    try:
+        response = requests.get(
+            "https://newapi.clinx.work/providers/modelsList",
+            headers={"Authorization": token},
+            timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+        models = data.get("data", {}).get("list", [])
+        res: List[Dict[str, Any]] = []
+        for m in models:
+            model_type = m.get("model_type", "text")
+            if model_type == "llm":
+                model_type = "text"
+            res.append({
+                "provider": "clinx",
+                "url": "https://newapi.clinx.work/v1",
+                "model": m.get("model_name", ""),
+                "type": model_type,
+                "priority": m.get("priority", 0)
+            })
+        return res
+    except Exception as e:
+        print(f"Error fetching models from clinx: {e}")
+        return []
 
 
 @router.get("/list_tools")

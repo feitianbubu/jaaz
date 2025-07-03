@@ -67,8 +67,13 @@ if os.path.exists(static_site):
     app.mount("/assets", NoCacheStaticFiles(directory=static_site), name="assets")
 
 
-@app.get("/")
-async def serve_react_app():
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    """
+    Catch-all route to serve the React app.
+    This is necessary for a Single Page Application (SPA) where routing is handled client-side.
+    Any path that is not a registered API endpoint will serve the index.html.
+    """
     response = FileResponse(os.path.join(react_build_dir, "index.html"))
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
