@@ -17,6 +17,7 @@ async def create_canvas(request: Request):
     id = data.get('canvas_id')
     name = data.get('name')
 
+    data['access_token'] = request.headers.get("Authorization")
     asyncio.create_task(handle_chat(data))
     await db_service.create_canvas(id, name)
     return {"id": id }

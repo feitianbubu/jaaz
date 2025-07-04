@@ -2,13 +2,14 @@
 import UpdateNotificationDialog from '@/components/common/UpdateNotificationDialog'
 import SettingsDialog from '@/components/settings/dialog'
 import { LoginDialog } from '@/components/auth/LoginDialog'
+import { Login99uDialog } from '@/components/auth/Login99uDialog'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { ConfigsProvider } from '@/contexts/configs'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { useTheme } from '@/hooks/use-theme'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Toaster } from 'sonner'
 import { routeTree } from './route-tree.gen'
 
@@ -27,6 +28,7 @@ const queryClient = new QueryClient()
 
 function App() {
   const { theme } = useTheme()
+  const [showLogin99u, setShowLogin99u] = useState(false)
 
   // Auto-start ComfyUI on app startup
   useEffect(() => {
@@ -78,6 +80,9 @@ function App() {
 
               {/* Login Dialog */}
               <LoginDialog />
+
+              {/* 99u Login Dialog */}
+              <Login99uDialog open={showLogin99u} onClose={() => setShowLogin99u(false)} onLoginSuccess={() => setShowLogin99u(false)} />
             </div>
           </ConfigsProvider>
         </AuthProvider>

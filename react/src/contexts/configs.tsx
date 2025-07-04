@@ -22,13 +22,13 @@ export const ConfigsProvider = ({
     queryKey: ['list_models'],
     queryFn: () => listModels(),
   })
-  // merge default models with the models from the server config to get the latest default models
-  const modelList = [
-    ...(data || []),
-    ...DEFAULT_MODEL_LIST.filter(
-      (m) => !data?.find((d) => d.provider == m.provider && d.model == m.model)
-    ),
-  ]
+  // const modelList = [
+  //   ...(data || []),
+  //   ...DEFAULT_MODEL_LIST.filter(
+  //     (m) => !data?.find((d) => d.provider == m.provider && d.model == m.model)
+  //   ),
+  // ]
+  const modelList = data || []
   useEffect(() => {
     if (!modelList) return
     if (modelList.length > 0) {

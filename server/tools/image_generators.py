@@ -49,6 +49,7 @@ PROVIDERS = {
     'jaaz': JaazGenerator(),
     'openai': OpenAIGenerator(),
     'volces': VolcesImageGenerator(),
+    'clinx': OpenAIGenerator(),
 }
 
 

@@ -82,9 +82,32 @@ export function UserMenu() {
   }
 
   // 未登录状态，显示登录按钮
+  // 99u登录相关配置
+  const AUTH_URL = 'https://uc-component.101.com' // TODO: 替换为实际99u登录地址
+  const CLIENT_ID = '2f8492db-41c2-4ed3-bd09-78832ca95f37' // TODO: 替换为实际client_id
+  const REDIRECT_URI = window.location.origin + '/99u-callback' // 新的回调地址
+
+  const handle99uLogin = () => {
+    const params = new URLSearchParams({
+      re_login: 'true',
+      redirect_type: 'window',
+      send_uckey: 'true',
+      redirect_uri: REDIRECT_URI,
+      'sdp-app-id': CLIENT_ID,
+      lang: 'zh-CN',
+    })
+    const url = `${AUTH_URL}/?${params.toString()}#/login`
+    window.location.href = url
+  }
+
   return (
-    <Button variant="outline" onClick={() => setShowLoginDialog(true)}>
-      {t('common:auth.login')}
-    </Button>
+    <div>
+      <Button variant="outline" onClick={() => setShowLoginDialog(true)}>
+        {t('common:auth.login')}
+      </Button>
+      <Button variant="outline" onClick={handle99uLogin}>
+        使用99u登录
+      </Button>
+    </div>
   )
 }

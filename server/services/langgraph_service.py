@@ -53,7 +53,8 @@ async def langgraph_agent(messages, canvas_id, session_id, text_model, image_mod
         model = text_model.get('model')
         provider = text_model.get('provider')
         url = text_model.get('url')
-        api_key = config_service.app_config.get(provider, {}).get("api_key", "")
+        api_key = access_token if access_token else config_service.app_config.get(provider, {}).get("api_key", "")
+        print(f"[langgraph_service] Using api_key: {api_key}")
         # TODO: Verify if max token is working
         max_tokens = text_model.get('max_tokens', 8148)
         if provider == 'ollama':
@@ -212,12 +213,15 @@ def create_handoff_tool(
     handoff_to_agent.metadata = {METADATA_KEY_HANDOFF_DESTINATION: agent_name}
     return handoff_to_agent
 
-async def langgraph_multi_agent(messages, canvas_id, session_id, text_model, image_model, system_prompt: str = None):
+async def langgraph_multi_agent(messages, canvas_id, session_id, text_model, image_model, system_prompt: str = None, access_token: str = None):
     try:
         model = text_model.get('model')
         provider = text_model.get('provider')
         url = text_model.get('url')
-        api_key = config_service.app_config.get(provider, {}).get("api_key", "")
+        api_key = access_token if access_token else config_service.app_config.get(provider, {}).get("api_key", "")
+        if api_key and api_key.startswith('Bearer '):
+            api_key = api_key[7:]
+        print(f"[langgraph_service] Using api_key: {api_key}")
         # TODO: Verify if max token is working
         max_tokens = text_model.get('max_tokens', 8148)
         if provider == 'ollama':

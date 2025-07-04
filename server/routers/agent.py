@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 import requests
 from services.config_service import config_service
 from services.db_service import db_service
@@ -36,35 +36,36 @@ def get_ollama_model_list():
 
 
 @router.get("/list_models")
-async def get_models():
-    config = config_service.get_config()
-    res = []
-    ollama_models = get_ollama_model_list()
-    ollama_url = config_service.get_config().get('ollama', {}).get(
-        'url', os.getenv('OLLAMA_HOST', 'http://localhost:11434'))
-    print('👇ollama_models', ollama_models)
-    for ollama_model in ollama_models:
-        res.append({
-            'provider': 'ollama',
-            'model': ollama_model,
-            'url': ollama_url,
-            'type': 'text'
-        })
-    for provider in config.keys():
-        models = config[provider].get('models', {})
-        for model_name in models:
-            if provider == 'ollama':
-                continue
-            if provider != 'comfyui' and config[provider].get('api_key', '') == '':
-                continue
-            model = models[model_name]
+async def get_models(request: Request):
+    token = request.headers.get("authorization")
+    if not token:
+        return []
+    try:
+        response = requests.get(
+            "https://newapi.clinx.work/providers/modelsList",
+            headers={"Authorization": token},
+            timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+        # 结构转换
+        models = data.get("data", {}).get("list", [])
+        res = []
+        for m in models:
+            model_type = m.get("model_type", "text")
+            if model_type == "llm":
+                model_type = "text"
             res.append({
-                'provider': provider,
-                'model': model_name,
-                'url': config[provider].get('url', ''),
-                'type': model.get('type', 'text')
+                "provider": "clinx",
+                "url": "https://newapi.clinx.work/v1",
+                "model": m.get("model_name", ""),
+                "type": model_type,
+                "priority": m.get("priority", 0)
             })
-    return res
+        return res
+    except Exception as e:
+        print(f"Error fetching models: {e}")
+        return []
 
 
 @router.get("/list_chat_sessions")
