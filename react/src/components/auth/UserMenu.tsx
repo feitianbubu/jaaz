@@ -102,9 +102,6 @@ export function UserMenu() {
 
   return (
     <div>
-      <Button variant="outline" onClick={() => setShowLoginDialog(true)}>
-        {t('common:auth.login')}
-      </Button>
       <Button variant="outline" onClick={handle99uLogin}>
         使用99u登录
       </Button>
