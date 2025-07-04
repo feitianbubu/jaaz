@@ -8,9 +8,12 @@ import { SettingsIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { UserMenu } from '@/components/auth/UserMenu'
 import AgentSettings from '../agent_studio/AgentSettings'
+import { useAuth } from '@/contexts/AuthContext'
 
 function HomeHeader() {
   const { setShowSettingsDialog } = useConfigs()
+  const { authStatus } = useAuth()
+  const canShowSettings = authStatus.is_logged_in && authStatus.user_info && Number(authStatus.user_info.role) >= 10
 
   return (
     <motion.div
@@ -26,13 +29,15 @@ function HomeHeader() {
       <div className="flex items-center gap-2">
         <NotificationPanel />
         <AgentSettings />
-        <Button
-          size={'sm'}
-          variant="ghost"
-          onClick={() => setShowSettingsDialog(true)}
-        >
-          <SettingsIcon size={30} />
-        </Button>
+        {canShowSettings && (
+          <Button
+            size={'sm'}
+            variant="ghost"
+            onClick={() => setShowSettingsDialog(true)}
+          >
+            <SettingsIcon size={30} />
+          </Button>
+        )}
         <LanguageSwitcher />
         <ThemeButton />
         {/* disable user login until cloud server is ready */}

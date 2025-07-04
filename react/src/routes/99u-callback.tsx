@@ -6,7 +6,7 @@ function RouteComponent() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const uckey = params.get('uckey')
-    function saveUserInfo(user: { id: number, username: string, access_token: string }) {
+    function saveUserInfo(user: { id: number, username: string, access_token: string, role?: number }) {
       // 兼容99u返回结构，假设没有email和image_url
       saveAuthData(user.access_token, {
         id: String(user.id),
@@ -14,10 +14,11 @@ function RouteComponent() {
         email: '',
         image_url: '',
         provider: '99u',
+        role: user.role ?? 0,
       })
     }
     if (uckey) {
-      fetch(`https://dev.clinx.work/api/oauth/nd99u?code=${encodeURIComponent(uckey)}`)
+      fetch(`https://newapi.clinx.work/api/oauth/nd99u?code=${encodeURIComponent(uckey)}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data) {
