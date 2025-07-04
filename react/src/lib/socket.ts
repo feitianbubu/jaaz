@@ -164,5 +164,7 @@ export class SocketIOManager {
 }
 
 export const socketManager = new SocketIOManager({
-  serverUrl: 'http://localhost:57988',
+  serverUrl:
+    import.meta.env.MODE === 'development' ? 'http://localhost:57988' : undefined,
+  autoConnect: false,
 })
