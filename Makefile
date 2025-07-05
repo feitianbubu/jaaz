@@ -40,6 +40,7 @@ help:
 # Target to build the Docker image
 build:
 	@echo "▶ Building Docker image: $(FULL_IMAGE_NAME):$(TAG) and $(FULL_IMAGE_NAME):$(LATEST_TAG)"
+	@echo "VITE_BUILD_TAG=${TAG}" > ./react/.env
 	docker build -t $(FULL_IMAGE_NAME):$(TAG) -t $(FULL_IMAGE_NAME):$(LATEST_TAG) .
 	@echo "✔ Build complete."
 
@@ -59,6 +60,8 @@ build-win:
 	@echo "▶ Building Python server..."
 	py -m PyInstaller server/main.spec --distpath server/dist --noconfirm
 	@echo "✔ Python server build complete."
+	@echo "VITE_BUILD_TAG=$(TAG)" > react/.env
+	cd react && npm run build
 	@echo "▶ Building Windows application..."
 	npm run build:win -- --config.buildVersion=$(NUMERIC_VERSION) --config.win.artifactName="Jaaz Setup $(TAG).exe"
 	@echo "✔ Windows application build complete."
