@@ -59,6 +59,8 @@ build-win:
 	@echo "▶ Building Python server..."
 	py -m PyInstaller server/main.spec --distpath server/dist --noconfirm
 	@echo "✔ Python server build complete."
+	@echo "VITE_BUILD_TAG=$(TAG)" > react/.env
+	cd react && npm run build
 	@echo "▶ Building Windows application..."
 	npm run build:win -- --config.buildVersion=$(NUMERIC_VERSION) --config.win.artifactName="Jaaz Setup $(TAG).exe"
 	@echo "✔ Windows application build complete."

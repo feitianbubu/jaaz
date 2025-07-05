@@ -29,6 +29,7 @@ const queryClient = new QueryClient()
 function App() {
   const { theme } = useTheme()
   const [showLogin99u, setShowLogin99u] = useState(false)
+  const buildTag = import.meta.env.VITE_BUILD_TAG
 
   // Auto-start ComfyUI on app startup
   useEffect(() => {
@@ -83,6 +84,13 @@ function App() {
 
               {/* 99u Login Dialog */}
               <Login99uDialog open={showLogin99u} onClose={() => setShowLogin99u(false)} onLoginSuccess={() => setShowLogin99u(false)} />
+
+              {/* Build version tag at bottom right */}
+              {buildTag && (
+                <div style={{ position: 'fixed', right: 12, bottom: 8, fontSize: 12, color: '#888', zIndex: 9999 }}>
+                  Build: {buildTag}
+                </div>
+              )}
             </div>
           </ConfigsProvider>
         </AuthProvider>
