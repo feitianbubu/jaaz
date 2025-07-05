@@ -1,4 +1,4 @@
-// import InstallComfyUIDialog from '@/components/comfyui/InstallComfyUIDialog'
+import InstallComfyUIDialog from '@/components/comfyui/InstallComfyUIDialog'
 import UninstallProgressDialog from '@/components/comfyui/UninstallProgressDialog'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,6 +9,7 @@ import { LLMConfig } from '@/types/types'
 import {
   AlertCircle,
   CheckCircle,
+  Download,
   Play,
   SquareSquareIcon,
   Trash2,
@@ -147,9 +148,9 @@ export default function ComfyuiSetting({
     })
   }
 
-    // const handleInstallClick = () => {
-    //   setShowInstallDialog(true)
-    // }
+    const handleInstallClick = () => {
+    setShowInstallDialog(true)
+  }
 
   // start ComfyUI
   const startComfyUI = async () => {
@@ -318,16 +319,15 @@ export default function ComfyuiSetting({
             </div>
           ) : (
             // Show install button if ComfyUI is not installed
-            <></>
-            // <Button
-            //   onClick={handleInstallClick}
-            //   variant="outline"
-            //   size="sm"
-            //   className="border-blue-300 text-blue-700 hover:bg-blue-50"
-            // >
-            //   <Download className="w-4 h-4 mr-2" />
-            //   {t('settings:comfyui.installButton')}
-            // </Button>
+            <Button
+              onClick={handleInstallClick}
+              variant="outline"
+              size="sm"
+              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              {t('settings:comfyui.installButton')}
+            </Button>
           )}
         </div>
       </div>
@@ -398,7 +398,7 @@ export default function ComfyuiSetting({
       )}
 
       {/* Install Dialog */}
-      {/* <InstallComfyUIDialog onInstallSuccess={handleInstallSuccess} /> */}
+      <InstallComfyUIDialog onInstallSuccess={handleInstallSuccess} />
 
       {/* Uninstall Dialog */}
       <UninstallProgressDialog

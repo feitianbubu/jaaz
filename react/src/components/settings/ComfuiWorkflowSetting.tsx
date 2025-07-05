@@ -91,7 +91,7 @@ export default function ComfuiWorkflowSetting() {
           </DialogContent>
         </Dialog>
       )}
-      {/* <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <PaletteIcon className="w-5 h-5" />
         <p className="text-sm font-bold">{t('settings:comfyui.workflows')}</p>
         <Button
@@ -105,7 +105,7 @@ export default function ComfuiWorkflowSetting() {
         {showAddWorkflowDialog && (
           <AddWorkflowDialog onClose={() => setShowAddWorkflowDialog(false)} />
         )}
-      </div> */}
+      </div>
       {/* Workflows */}
       {workflows.length > 0 && (
         <div className="space-y-2">
@@ -214,6 +214,10 @@ function AddWorkflowDialog({ onClose }: { onClose: () => void }) {
     }
     if (workflowName === '') {
       setError('Please enter a workflow name')
+      return
+    }
+    if (workflowDescription === '') {
+      setError('Please enter a workflow description')
       return
     }
     fetch('/api/settings/comfyui/create_workflow', {
@@ -359,7 +363,7 @@ function AddWorkflowDialog({ onClose }: { onClose: () => void }) {
                   {node.class_type} #{nodeID}
                 </p>
                 <div className="ml-4 flex flex-col gap-1">
-                  {Object.keys(node.inputs).map((inputKey) => {
+                  {node.inputs && Object.keys(node.inputs).map((inputKey) => {
                     const inputValue = node.inputs[inputKey]
                     if (
                       typeof inputValue !== 'boolean' &&
