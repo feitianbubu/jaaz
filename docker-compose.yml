@@ -1,0 +1,9 @@
+services:
+  jaaz:
+    image: skynono/jaaz:latest
+    container_name: jaaz
+    ports:
+      - "57988:57988"
+    volumes:
+      - ./server/user_data:/app/server/user_data
+    restart: unless-stopped
