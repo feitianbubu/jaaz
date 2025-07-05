@@ -35,9 +35,7 @@ def get_ollama_model_list():
         return []
 
 
-@router.get("/list_models")
-async def get_models(request: Request):
-    token = request.headers.get("authorization")
+async def list_models_clinx(token: str):
     if not token:
         return []
     try:
@@ -64,8 +62,29 @@ async def get_models(request: Request):
             })
         return res
     except Exception as e:
-        print(f"Error fetching models: {e}")
+        print(f"Error fetching models from clinx: {e}")
         return []
+
+
+@router.get("/list_models")
+async def get_models(request: Request):
+    token = request.headers.get("authorization")
+    clinx_models = await list_models_clinx(token)
+
+    config = config_service.get_config()
+    comfyui_models = []
+    if 'comfyui' in config:
+        models = config['comfyui'].get('models', {})
+        for model_name in models:
+            model = models[model_name]
+            comfyui_models.append({
+                'provider': 'comfyui',
+                'model': model_name,
+                'url': config['comfyui'].get('url', ''),
+                'type': model.get('type', 'text')
+            })
+    
+    return clinx_models + comfyui_models
 
 
 @router.get("/list_chat_sessions")

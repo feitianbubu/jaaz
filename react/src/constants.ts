@@ -98,9 +98,6 @@ export const DEFAULT_PROVIDERS_CONFIG: { [key: string]: LLMConfig } = {
   },
   comfyui: {
     models: {
-      'flux-dev': { type: 'image' },
-      'flux-schnell': { type: 'image' },
-      sdxl: { type: 'image' },
     },
     url: 'http://127.0.0.1:8188',
     api_key: '',
