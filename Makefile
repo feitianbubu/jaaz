@@ -11,6 +11,8 @@ DOCKER_REGISTRY ?= skynono
 IMAGE_NAME      ?= jaaz
 # Default tag is the short git commit hash. This is a best practice for versioning.
 TAG             ?= $(shell git describe --tags --always --dirty)
+# Combine into numeric version (e.g., 1.0.16.17 or 1.0.16.0)
+NUMERIC_VERSION := $(shell echo "$(TAG)" | sed 's/^v//' | awk -F'-' '{printf "%s.%s", $$1, ($$2=="")?0:$$2}')
 LATEST_TAG      ?= latest
 
 FULL_IMAGE_NAME = $(DOCKER_REGISTRY)/$(IMAGE_NAME)
@@ -18,16 +20,17 @@ FULL_IMAGE_NAME = $(DOCKER_REGISTRY)/$(IMAGE_NAME)
 # --- Targets ---
 
 # Phony targets are not actual files. This is a best practice.
-.PHONY: help build push publish
+.PHONY: help build push publish build-win
 
 # Default target: running `make` without arguments will show the help message.
 help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  build    Build the Docker image with tags: $(TAG) and $(LATEST_TAG)"
-	@echo "  push     Push the built image to the configured registry."
-	@echo "  publish  A shortcut to build and then push the image."
+	@echo "  build         Build the Docker image with tags: $(TAG) and $(LATEST_TAG)"
+	@echo "  push          Push the built image to the configured registry."
+	@echo "  publish       A shortcut to build and then push the image."
+	@echo "  build:win     Build the Windows application."
 	@echo ""
 	@echo "Configuration (can be overridden):"
 	@echo "  DOCKER_REGISTRY=$(DOCKER_REGISTRY)"
@@ -50,3 +53,12 @@ push:
 # Target to build and then publish the image
 publish: build push
 	@echo "✨ Publish successful: $(FULL_IMAGE_NAME):$(TAG)"
+
+# Target to build the Windows application
+build-win:
+	@echo "▶ Building Python server..."
+	py -m PyInstaller server/main.spec --distpath server/dist --noconfirm
+	@echo "✔ Python server build complete."
+	@echo "▶ Building Windows application..."
+	npm run build:win -- --config.buildVersion=$(NUMERIC_VERSION) --config.win.artifactName="Jaaz Setup $(TAG).exe"
+	@echo "✔ Windows application build complete."
