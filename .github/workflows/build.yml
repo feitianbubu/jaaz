@@ -3,7 +3,6 @@ name: Build and Package Desktop App
 
 on:
   push:
-    branches: [main, dev, art]
     tags:
       - '*'
 
@@ -26,11 +25,9 @@ jobs:
           if [[ "$TAG_VERSION" == "$GITHUB_REF" ]]; then
             TAG_VERSION=${GITHUB_REF#refs/tags/}
           fi
-          cd react
           jq ".version = \"$TAG_VERSION\"" package.json > package.tmp.json
           mv package.tmp.json package.json
           cat package.json
-          cd ..
 
       - name: Set up Python
         uses: actions/setup-python@v4
