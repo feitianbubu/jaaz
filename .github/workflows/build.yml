@@ -3,16 +3,15 @@ name: Build and Package Desktop App
 
 on:
   push:
-    branches: [main, dev, art]
-  pull_request:
-    branches: [main, dev, art]
+    tags:
+      - '*'
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [windows-latest]
         arch: [x64, arm64]
 
     steps:
