@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+.gitmodules
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Node
+node_modules
+react/node_modules
+react/dist
+npm-debug.log
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# IDE & OS specific
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Desktop.ini
+Thumbs.db
+.DS_Store
