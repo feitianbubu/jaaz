@@ -52,8 +52,8 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
     },
     'openai': {
         'models': {
-            'gpt-4o': {'type': 'text'},
-            'gpt-4o-mini': {'type': 'text'},
+            # 'gpt-4o': {'type': 'text'},
+            # 'gpt-4o-mini': {'type': 'text'},
         },
         'url': 'https://api.openai.com/v1/',
         'api_key': '',

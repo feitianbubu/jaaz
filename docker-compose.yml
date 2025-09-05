@@ -1,0 +1,35 @@
+services:
+  jaaz:
+    image: jaaz:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "57988:57988"
+    volumes:
+      - ./user_data:/app/server/user_data
+    environment:
+      - USER_DATA_DIR=/app/server/user_data
+      - UI_DIST_DIR=/app/server/ui
+      - PYTHONUNBUFFERED=1
+      - NODE_ENV=production
+      # Optional: Set SERVER_URL for custom domain (defaults to localhost if not set)
+      - SERVER_URL
+    restart: unless-stopped
+
+  # Optional: Development service
+  jaaz-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend-builder
+    container_name: jaaz-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./react:/app/react
+      - /app/react/node_modules
+    environment:
+      - NODE_ENV=development
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
