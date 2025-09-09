@@ -86,6 +86,17 @@ async def serve_react_app():
     response.headers["Expires"] = "0"
     return response
 
+# Add specific route for 99u OAuth callback
+@app.get("/99u-callback")
+async def serve_99u_callback():
+    """Serve React app for 99u OAuth callback"""
+    response = FileResponse(os.path.join(react_build_dir, "index.html"))
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
 print('Creating socketio app')
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path='/socket.io')
 

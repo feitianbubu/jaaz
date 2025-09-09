@@ -17,10 +17,10 @@ export function PointsDisplay({ className, children }: PointsDisplayProps) {
   return (
     <div className={cn('flex items-center relative', className)}>
       {/* 积分显示区域 */}
-      <div className="flex items-center bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 pr-8">
+      <div className="flex items-center bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 pr-30">
         <Zap className="w-3.5 h-3.5 text-black dark:text-white mr-1.5" />
         <span className="text-xs font-semibold text-black dark:text-white">
-          {points}
+          {balance}
         </span>
       </div>
 

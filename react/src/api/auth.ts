@@ -17,6 +17,7 @@ export interface UserInfo {
   provider?: string
   created_at?: string
   updated_at?: string
+  role?: number  // 新增role字段，支持99u用户角色
 }
 
 export interface DeviceAuthResponse {
@@ -102,6 +103,19 @@ export async function getAuthStatus(): Promise<AuthStatus> {
 
   if (token && userInfo) {
     try {
+      const parsedUserInfo = JSON.parse(userInfo)
+      
+      // Skip token refresh for 99u users, as they use a different token system
+      if (parsedUserInfo.provider === '99u') {
+        console.log('99u user detected, skipping token refresh')
+        const authStatus = {
+          status: 'logged_in' as const,
+          is_logged_in: true,
+          user_info: parsedUserInfo,
+        }
+        return authStatus
+      }
+
       // Always try to refresh token when we have one
       const newToken = await refreshToken(token)
 
