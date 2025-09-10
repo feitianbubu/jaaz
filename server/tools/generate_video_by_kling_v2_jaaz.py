@@ -77,6 +77,10 @@ async def generate_video_by_kling_v2_jaaz(
             raise ValueError(
                 f"Failed to process input image: {first_image}. Please check if the image exists and is valid.")
 
+        # Extract pure base64 data from data URL format
+        if processed_image.startswith('data:'):
+            processed_image = processed_image.split(',')[1]
+
         print(
             f"Using first input image as start image for Kling video generation: {first_image}")
 
@@ -84,10 +88,10 @@ async def generate_video_by_kling_v2_jaaz(
         jaaz_service = JaazService()
         result = await jaaz_service.generate_video(
             prompt=prompt,
-            model="kling-v2.1-standard",
+            model="kling-v1",
             duration=duration,
             aspect_ratio=aspect_ratio,
-            input_images=[processed_image],
+            input_images=[processed_image],  # Pass image as input_images list
             negative_prompt=negative_prompt,
             guidance_scale=guidance_scale,
         )

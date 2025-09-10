@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { saveAuthData } from '../api/auth'
 import { extractUckeyFromUrl, verify99uToken, convert99uUserToUserInfo } from '../api/auth-99u'
+import { updateJaazApiKey } from '../api/config'
 
 /**
  * 99u OAuth回调页面组件
@@ -32,6 +33,15 @@ function RouteComponent() {
         // 转换用户信息格式并保存
         const userInfo = convert99uUserToUserInfo(response.data)
         saveAuthData(response.data.access_token, userInfo)
+        
+    // 将access_token同步到jaaz provider的api_key
+    try {
+      await updateJaazApiKey(response.data.access_token)
+      console.log('✅ 99u access_token已同步到jaaz api_key')
+    } catch (error) {
+      console.error('❌ 同步jaaz api_key失败:', error)
+      // 即使同步失败也不影响登录状态
+    }
         
         // 跳转到首页
         window.location.replace('/')

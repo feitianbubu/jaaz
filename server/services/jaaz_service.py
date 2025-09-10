@@ -23,8 +23,8 @@ class JaazService:
             raise ValueError("Jaaz API token is not configured")
 
         # 确保 API 地址以 /api/v1 结尾
-        if not self.api_url.endswith('/api/v1'):
-            self.api_url = f"{self.api_url}/api/v1"
+        # if not self.api_url.endswith('/api/v1'):
+        #     self.api_url = f"{self.api_url}/api/v1"
 
         print(f"✅ Jaaz service initialized with API URL: {self.api_url}")
 
@@ -124,7 +124,7 @@ class JaazService:
                 payload["input_images"] = input_images
 
             async with session.post(
-                f"{self.api_url}/video/sunra/generations",
+                f"{self.api_url}/video/generations",
                 headers=self._build_headers(),
                 json=payload,
                 timeout=aiohttp.ClientTimeout(total=120.0)
@@ -141,7 +141,7 @@ class JaazService:
                     error_text = await response.text()
                     raise Exception(f"Failed to create video task: HTTP {response.status} - {error_text}")
 
-    async def poll_for_task_completion(
+    async def poll_for_task_completion_jaaz(
         self,
         task_id: str,
         max_attempts: Optional[int] = None,
@@ -167,7 +167,7 @@ class JaazService:
         async with HttpClient.create_aiohttp() as session:
             for _ in range(max_attempts):
                 async with session.get(
-                    f"{self.api_url}/task/{task_id}",
+                    f"{self.api_url}/video/generations/{task_id}",
                     headers=self._build_headers(),
                     timeout=aiohttp.ClientTimeout(total=20.0)
                 ) as response:
@@ -187,6 +187,71 @@ class JaazService:
                             elif status == 'cancelled':
                                 raise Exception("Task was cancelled")
                             elif status == 'processing':
+                                # 继续轮询
+                                await asyncio.sleep(interval)
+                                continue
+                            else:
+                                raise Exception(f"Unknown task status: {status}")
+                        else:
+                            raise Exception("Task not found")
+                    else:
+                        raise Exception(f"Failed to get task status: HTTP {response.status}")
+
+            raise Exception(f"Task polling timeout after {max_attempts} attempts")
+
+    # 修改为clinx的task
+    async def poll_for_task_completion(
+        self,
+        task_id: str,
+        max_attempts: Optional[int] = None,
+        interval: Optional[float] = None
+    ) -> Dict[str, Any]:
+        """
+        等待任务完成并返回结果
+
+        Args:
+            task_id: 任务 ID
+            max_attempts: 最大轮询次数
+            interval: 轮询间隔（秒）
+
+        Returns:
+            Dict[str, Any]: 任务结果
+
+        Raises:
+            Exception: 当任务失败或超时时抛出异常
+        """
+        max_attempts = max_attempts or 150  # 默认最多轮询 150 次
+        interval = interval or 2.0  # 默认轮询间隔 2 秒
+
+        async with HttpClient.create_aiohttp() as session:
+            for _ in range(max_attempts):
+                await asyncio.sleep(interval)
+                async with session.get(
+                        f"{self.api_url}/video/generations/{task_id}",
+                        headers=self._build_headers(),
+                        timeout=aiohttp.ClientTimeout(total=20.0)
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        if data.get('data', {}).get('status'):
+                            status = data['data']['status']
+
+                            if status == 'succeeded' or status == 'SUCCESS':
+                                print(
+                                    f"✅ Task {task_id} completed successfully")
+                                # 构建新的task对象，提取fail_reason作为result_url
+                                result_task = {
+                                    'status': status,
+                                    'task_id': task_id,
+                                    'result_url': data['data'].get('fail_reason', '')
+                                }
+                                return result_task
+                            elif status == 'failed':
+                                error_msg = task.get('error', 'Unknown error')
+                                raise Exception(f"Task failed: {error_msg}")
+                            elif status == 'cancelled':
+                                raise Exception("Task was cancelled")
+                            elif status == 'processing' or status == 'IN_PROGRESS' or status == 'QUEUED' or status == 'SUBMITTED' or status == 'NOT_START':
                                 # 继续轮询
                                 await asyncio.sleep(interval)
                                 continue
