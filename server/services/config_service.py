@@ -29,13 +29,14 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
     'jaaz': {
         'models': {
             # text models
-            'gpt-4o': {'type': 'text'},
-            'gpt-4o-mini': {'type': 'text'},
-            'deepseek/deepseek-chat-v3-0324': {'type': 'text'},
-            'anthropic/claude-sonnet-4': {'type': 'text'},
-            'anthropic/claude-3.7-sonnet': {'type': 'text'},
+            # 'gpt-4o': {'type': 'text'},
+            # 'gpt-4o-mini': {'type': 'text'},
+            # 'deepseek/deepseek-chat-v3-0324': {'type': 'text'},
+            # 'anthropic/claude-sonnet-4': {'type': 'text'},
+            # 'anthropic/claude-3.7-sonnet': {'type': 'text'},
+            'deepseek-v3-0324': {'type': 'text'},
         },
-        'url': os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/api/v1/',
+        'url': os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/v1/',
         'api_key': '',
         'max_tokens': 8192,
     },
@@ -100,7 +101,7 @@ class ConfigService:
 
     def _get_jaaz_url(self) -> str:
         """Get the correct jaaz URL"""
-        return os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/api/v1/'
+        return os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/v1/'
 
     async def initialize(self) -> None:
         try:
