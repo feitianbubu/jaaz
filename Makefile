@@ -21,7 +21,7 @@ run:
 # Quick rebuild (reuse cached layers)
 rebuild: build up
 rebuild-no-cache: build-no-cache up
-release: build push
+publish: build push
 
 # Development mode  
 dev:
