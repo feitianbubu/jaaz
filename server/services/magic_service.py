@@ -29,17 +29,14 @@ async def handle_magic(data: Dict[str, Any]) -> None:
             - canvas_id: canvas identifier (contextual use)
             - text_model: text model configuration
             - tool_list: list of tool model configurations (images/videos)
+            - token: JWT token for authentication
     """
     # Extract fields from incoming data
     messages: List[Dict[str, Any]] = data.get('messages', [])
     session_id: str = data.get('session_id', '')
     canvas_id: str = data.get('canvas_id', '')
+    token: str = data.get('token', '')
 
-    # print('✨ magic_service 接收到数据:', {
-    #     'session_id': session_id,
-    #     'canvas_id': canvas_id,
-    #     'messages_count': len(messages),
-    # })
 
     # If there is only one message, create a new magic session
     if len(messages) == 1:
@@ -54,7 +51,7 @@ async def handle_magic(data: Dict[str, Any]) -> None:
         )
 
     # Create and start magic generation task
-    task = asyncio.create_task(_process_magic_generation(messages, session_id, canvas_id))
+    task = asyncio.create_task(_process_magic_generation(messages, session_id, canvas_id, token))
 
     # Register the task in stream_tasks (for possible cancellation)
     add_stream_task(session_id, task)
@@ -71,11 +68,11 @@ async def handle_magic(data: Dict[str, Any]) -> None:
 
     print('✨ magic_service 处理完成')
 
-
 async def _process_magic_generation(
     messages: List[Dict[str, Any]],
     session_id: str,
     canvas_id: str,
+    token: str = '',
 ) -> None:
     """
     Process magic generation in a separate async task.
@@ -84,6 +81,7 @@ async def _process_magic_generation(
         messages: List of messages
         session_id: Session ID
         canvas_id: Canvas ID
+        token: JWT token for authentication
     """
 
     ai_response = await create_jaaz_response(messages, session_id, canvas_id)

@@ -4,6 +4,7 @@ import traceback
 import aiofiles
 import toml
 from typing import Dict, TypedDict, Literal, Optional
+from utils.jwt_utils import JWTUtils
 
 # 定义配置文件的类型结构
 
@@ -101,7 +102,7 @@ class ConfigService:
 
     def _get_jaaz_url(self) -> str:
         """Get the correct jaaz URL"""
-        return os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/v1/'
+        return os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/') + '/v1/'
 
     async def initialize(self) -> None:
         try:
@@ -170,6 +171,65 @@ class ConfigService:
 
     def exists_config(self) -> bool:
         return os.path.exists(self.config_file)
+
+    def get_provider_config_for_token(self, provider: str, token: str) -> Dict:
+        """
+        为特定用户获取provider配置，插入用户token到配置中
+        """
+        # 获取基础配置
+        config = self.app_config.get(provider, {}).copy()
+        
+        # 如果有token，返回配置且api_key为用户token
+        if token and token.strip():
+            config['api_key'] = token
+            print(f"🔑 Using user-specific API key for {provider} provider")
+        
+        return config
+    
+    def set_user_api_key_from_token(self, provider: str, token: str) -> Dict[str, str]:
+        """
+        通过JWT token设置用户级别的provider api_key
+        这是一个开销销的方法，不进行配置结构性变化，仅在内存中临时应用
+        """
+        try:
+            # 解析token获取用户信息
+            user_id = JWTUtils.extract_user_id(token)
+            username = JWTUtils.extract_username(token)
+            
+            if not user_id:
+                return {"status": "error", "message": "Invalid token: cannot extract user_id"}
+            
+            # 这里应该实现基于用户的配置存储
+            # 但采用最简单方案：在当前配置基础上直接更新用户的配置
+            if provider in self.app_config:
+                # 暂时在全局配置中设置用户token（临时解决方案）
+                self.app_config[provider]['api_key'] = token
+                return {
+                    "status": "success",
+                    "message": f"Updated {provider} API key for user {user_id}",
+                    "user_id": user_id,
+                    "username": username
+                }
+            else:
+                return {"status": "error", "message": f"Provider {provider} not found"}
+                
+        except Exception as e:
+            traceback.print_exc()
+            return {"status": "error", "message": f"Failed to set API key: {str(e)}"}
+    
+    def clear_user_session(self, user_id: str) -> None:
+        """
+        清除用户会话配置（恢复全局配置）
+        """
+        try:
+            # 恢复为全局默认配置
+            if 'jaaz' in self.app_config:
+                # 如果原配置有保存，恢复原有的全局api_key  
+                self.app_config['jaaz']['api_key'] = ''  # 清空用户配置，使用全局配置
+            print(f"🧹 Cleared user session config for {user_id}")
+        except Exception as e:
+            print(f"Error clearing user session: {e}")
+
 
 
 config_service = ConfigService()

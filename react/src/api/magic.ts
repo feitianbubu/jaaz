@@ -1,5 +1,6 @@
 import { Message, Model } from '@/types/types'
 import { ToolInfo } from './model'
+import { getAccessToken, authenticatedFetch } from './auth'
 
 export const sendMagicGenerate = async (payload: {
   sessionId: string
@@ -7,11 +8,8 @@ export const sendMagicGenerate = async (payload: {
   newMessages: Message[]
   systemPrompt: string | null
 }) => {
-  const response = await fetch(`/api/magic`, {
+  const response = await authenticatedFetch(`/api/magic`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify({
       messages: payload.newMessages,
       canvas_id: payload.canvasId,
@@ -24,7 +22,7 @@ export const sendMagicGenerate = async (payload: {
 }
 
 export const cancelMagicGenerate = async (sessionId: string) => {
-    const response = await fetch(`/api/magic/cancel/${sessionId}`, {
+    const response = await authenticatedFetch(`/api/magic/cancel/${sessionId}`, {
         method: 'POST',
     })
     return await response.json()
