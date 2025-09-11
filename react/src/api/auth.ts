@@ -206,7 +206,9 @@ export function saveAuthData(token: string, userInfo: UserInfo) {
 
 // Helper function to get access token
 export function getAccessToken(): string | null {
-  return localStorage.getItem('jaaz_access_token')
+  const token = localStorage.getItem('jaaz_access_token')
+  console.log('getAccessToken called, token:', token ? 'exists' : 'null')
+  return token
 }
 
 // Helper function to make authenticated API calls
@@ -215,6 +217,15 @@ export async function authenticatedFetch(
   options: RequestInit = {}
 ): Promise<Response> {
   const token = getAccessToken()
+  console.log('authenticatedFetch called, URL:', url, 'token:', token ? 'exists' : 'null')
+
+  // 如果 URL 是相对路径，检查当前协议和主机，确保与服务器一致
+  let fullUrl = url
+  if (url.startsWith('/')) {
+    // 使用当前页面的协议和主机
+    fullUrl = `${window.location.protocol}//${window.location.host}${url}`
+    console.log('Converted relative URL to full URL:', fullUrl)
+  }
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -223,9 +234,14 @@ export async function authenticatedFetch(
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
+    console.log('Authorization header added')
+  } else {
+    console.log('No token found, skipping Authorization header')
   }
 
-  return fetch(url, {
+  console.log('Final headers before fetch:', headers)
+
+  return fetch(fullUrl, {
     ...options,
     headers,
   })

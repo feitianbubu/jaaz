@@ -29,9 +29,13 @@ class TaskSearchResponse(BaseModel):
 class JaazImageProvider(ImageProviderBase):
     """Jaaz Cloud image generation provider implementation"""
 
-    def _build_url(self) -> str:
+    def _build_url(self, token: Optional[str] = None) -> str:
         """Build request URL"""
-        config = config_service.app_config.get('jaaz', {})
+        if token:
+            config = config_service.get_provider_config_for_token('jaaz', token)
+        else:
+            config = config_service.app_config.get('jaaz', {})
+        
         api_url = str(config.get("url", "")).rstrip("/")
         api_token = str(config.get("api_key", ""))
 
@@ -44,9 +48,12 @@ class JaazImageProvider(ImageProviderBase):
         else:
             return f"{api_url.rstrip('/')}/api/v1/image/generations"
 
-    def _build_search_url(self) -> str:
+    def _build_search_url(self, token: Optional[str] = None) -> str:
         """Build task search URL"""
-        config = config_service.app_config.get('jaaz', {})
+        if token:
+            config = config_service.get_provider_config_for_token('jaaz', token)
+        else:
+            config = config_service.app_config.get('jaaz', {})
         api_url = str(config.get("url", "")).rstrip("/")
 
         if api_url.rstrip('/').endswith('/api/v1'):
@@ -54,8 +61,11 @@ class JaazImageProvider(ImageProviderBase):
         else:
             return f"{api_url.rstrip('/')}/api/v1/task/search"
 
-    def _build_headers(self) -> Dict[str, str]:
-        config = config_service.app_config.get('jaaz', {})
+    def _build_headers(self, token: Optional[str] = None) -> Dict[str, str]:
+        if token:
+            config = config_service.get_provider_config_for_token('jaaz', token)
+        else:
+            config = config_service.app_config.get('jaaz', {})
         api_token = str(config.get("api_key", ""))
 
         """Build request headers"""
@@ -64,7 +74,7 @@ class JaazImageProvider(ImageProviderBase):
             "Content-Type": "application/json"
         }
 
-    async def _search_cloud_task(self, prompt: str) -> Optional[Dict[str, Any]]:
+    async def _search_cloud_task(self, prompt: str, token: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Search for existing cloud task
 
@@ -75,8 +85,8 @@ class JaazImageProvider(ImageProviderBase):
             Task data if found and succeeded, None otherwise
         """
         try:
-            url = self._build_search_url()
-            headers = self._build_headers()
+            url = self._build_search_url(token)
+            headers = self._build_headers(token)
 
             search_data = {
                 "prompt": prompt,
@@ -102,7 +112,7 @@ class JaazImageProvider(ImageProviderBase):
             print(f'🦄 Error searching cloud task: {e}')
             return None
 
-    async def _wait_for_task_completion(self, prompt: str, max_wait_time: int = 300) -> Optional[Dict[str, Any]]:
+    async def _wait_for_task_completion(self, prompt: str, token: Optional[str] = None, max_wait_time: int = 300) -> Optional[Dict[str, Any]]:
         """
         Wait for cloud task to complete
 
@@ -119,7 +129,7 @@ class JaazImageProvider(ImageProviderBase):
         max_no_task_retries = 5
 
         while True:
-            task = await self._search_cloud_task(prompt)
+            task = await self._search_cloud_task(prompt, token)
 
             if not task:
                 no_task_retry_count += 1
@@ -251,6 +261,7 @@ class JaazImageProvider(ImageProviderBase):
         aspect_ratio: str = "1:1",
         input_images: Optional[list[str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        token: Optional[str] = None,
         **kwargs: Any
     ) -> tuple[str, int, int, str]:
         """
@@ -292,8 +303,8 @@ class JaazImageProvider(ImageProviderBase):
     ) -> tuple[str, int, int, str]:
         """Generate Replicate format image"""
         try:
-            url = self._build_url()
-            headers = self._build_headers()
+            url = self._build_url(token)
+            headers = self._build_headers(token)
 
             # Build request data, consistent with Replicate format
             data = {
@@ -320,7 +331,7 @@ class JaazImageProvider(ImageProviderBase):
             # Always attempt cloud task fallback on any error
             print('🦄 Attempting cloud task fallback...')
             try:
-                task = await self._wait_for_task_completion(prompt)
+                task = await self._wait_for_task_completion(prompt, token)
                 if task:
                     print('🦄 Successfully recovered using cloud task')
                     return await self._process_cloud_task_result(task, metadata)
@@ -349,8 +360,8 @@ class JaazImageProvider(ImageProviderBase):
             tuple[str, int, int, str]: (mime_type, width, height, filename)
         """
         try:
-            url = self._build_url()
-            headers = self._build_headers()
+            url = self._build_url(token)
+            headers = self._build_headers(token)
 
             # Build request data
             enhanced_prompt = f"{prompt} Aspect ratio: {aspect_ratio}"
@@ -380,7 +391,7 @@ class JaazImageProvider(ImageProviderBase):
             try:
                 # For OpenAI models, use the original prompt
                 enhanced_prompt = f"{prompt} Aspect ratio: {aspect_ratio}"
-                task = await self._wait_for_task_completion(enhanced_prompt)
+                task = await self._wait_for_task_completion(enhanced_prompt, token)
                 if task:
                     print('🦄 Successfully recovered using cloud task')
                     return await self._process_cloud_task_result(task, metadata)

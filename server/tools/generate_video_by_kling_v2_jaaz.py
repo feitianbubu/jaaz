@@ -81,11 +81,9 @@ async def generate_video_by_kling_v2_jaaz(
         if processed_image.startswith('data:'):
             processed_image = processed_image.split(',')[1]
 
-        print(
-            f"Using first input image as start image for Kling video generation: {first_image}")
-
-        # Create Jaaz service and generate video
-        jaaz_service = JaazService()
+        # Create Jaaz service and generate video with token from context
+        token = ctx.get('token', '')
+        jaaz_service = JaazService(token=token)
         result = await jaaz_service.generate_video(
             prompt=prompt,
             model="kling-v1",

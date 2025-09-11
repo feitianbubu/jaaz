@@ -75,8 +75,16 @@ async def get_models() -> list[ModelInfo]:
         provider_url = provider_config.get('url', '').strip()
         provider_api_key = provider_config.get('api_key', '').strip()
 
-        # Skip provider if URL is empty or API key is empty
-        if not provider_url or not provider_api_key:
+        # Skip provider if URL is empty
+        if not provider_url:
+            continue
+        
+        # For jaaz provider, always show models even if no global API key
+        # (users can login to get their own API key)
+        if provider == 'jaaz':
+            pass  # Always include jaaz models
+        elif not provider_api_key:
+            # For other providers, skip if no API key
             continue
 
         models = provider_config.get('models', {})
@@ -99,12 +107,21 @@ async def list_tools() -> list[ToolInfoJson]:
     config = config_service.get_config()
     res: list[ToolInfoJson] = []
     for tool_id, tool_info in tool_service.tools.items():
+        print(f"tool_id: {tool_id}, tool_info: {tool_info}")
         if tool_info.get('provider') == 'system':
             continue
+        
         provider = tool_info['provider']
         provider_api_key = config[provider].get('api_key', '').strip()
-        if provider != 'comfyui' and not provider_api_key:
+        
+        # For jaaz provider, always show tools even if no global API key
+        # (users can login to get their own API key)
+        if provider == 'jaaz':
+            pass  # Always include jaaz tools
+        elif provider != 'comfyui' and not provider_api_key:
+            # For other providers, skip if no API key
             continue
+            
         res.append({
             'id': tool_id,
             'provider': tool_info.get('provider', ''),

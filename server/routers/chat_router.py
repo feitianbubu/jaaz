@@ -22,6 +22,23 @@ async def chat(request: Request):
         {"status": "done"}
     """
     data = await request.json()
+    
+    # Extract token from Authorization header
+    token = None
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        token = auth_header[7:]
+    
+    # Also check for authorization in lowercase
+    if not token:
+        auth_header_lower = request.headers.get('authorization', '')
+        if auth_header_lower.startswith('Bearer '):
+            token = auth_header_lower[7:]
+    
+    # Add token to data
+    if token:
+        data['token'] = token
+    
     await handle_chat(data)
     return {"status": "done"}
 
@@ -60,6 +77,22 @@ async def magic(request: Request):
         {"status": "done"}
     """
     data = await request.json()
+    
+    # Extract token from Authorization header - 与chat保持一致
+    token = None
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        token = auth_header[7:]
+    
+    if not token:
+        auth_header_lower = request.headers.get('authorization', '')
+        if auth_header_lower.startswith('Bearer '):
+            token = auth_header_lower[7:]
+    
+    # Add token to data if found
+    if token:
+        data['token'] = token
+    
     await handle_magic(data)
     return {"status": "done"}
 

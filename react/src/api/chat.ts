@@ -1,5 +1,6 @@
 import { Message, Model } from '@/types/types'
 import { ModelInfo, ToolInfo } from './model'
+import { getAccessToken, authenticatedFetch } from './auth'
 
 export const getChatSession = async (sessionId: string) => {
   const response = await fetch(`/api/chat_session/${sessionId}`)
@@ -15,11 +16,8 @@ export const sendMessages = async (payload: {
   toolList: ToolInfo[]
   systemPrompt: string | null
 }) => {
-  const response = await fetch(`/api/chat`, {
+  const response = await authenticatedFetch(`/api/chat`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify({
       messages: payload.newMessages,
       canvas_id: payload.canvasId,
@@ -34,7 +32,7 @@ export const sendMessages = async (payload: {
 }
 
 export const cancelChat = async (sessionId: string) => {
-  const response = await fetch(`/api/cancel/${sessionId}`, {
+  const response = await authenticatedFetch(`/api/cancel/${sessionId}`, {
     method: 'POST',
   })
   return await response.json()

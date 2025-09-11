@@ -11,11 +11,16 @@ class JaazService:
     """Jaaz 云端 API 服务
     """
 
-    def __init__(self):
-        """初始化 Jaaz 服务"""
+    def __init__(self, token: str = None):
+        """初始化 Jaaz 服务
+        
+        Args:
+            token: JWT token用于视频生成认证，如果提供则覆盖配置文件中的api_key
+        """
         config = config_service.app_config.get('jaaz', {})
         self.api_url = str(config.get("url", "")).rstrip("/")
-        self.api_token = str(config.get("api_key", ""))
+        # 优先使用传入的token，其次使用配置文件中的api_key
+        self.api_token = token if token else str(config.get("api_key", ""))
 
         if not self.api_url:
             raise ValueError("Jaaz API URL is not configured")

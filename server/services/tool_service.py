@@ -222,7 +222,8 @@ class ToolService:
         try:
             for provider_name, provider_config in config_service.app_config.items():
                 # register all tools by api provider with api key
-                if provider_config.get("api_key", ""):
+                # For jaaz provider, always register tools even if no global API key
+                if provider_config.get("api_key", "") or provider_name == 'jaaz':
                     for tool_id, tool_info in TOOL_MAPPING.items():
                         if tool_info.get("provider") == provider_name:
                             self.register_tool(tool_id, tool_info)
