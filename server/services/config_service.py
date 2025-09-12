@@ -35,7 +35,11 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
             # 'deepseek/deepseek-chat-v3-0324': {'type': 'text'},
             # 'anthropic/claude-sonnet-4': {'type': 'text'},
             # 'anthropic/claude-3.7-sonnet': {'type': 'text'},
-            'deepseek-v3-0324': {'type': 'text'},
+            'kimi-k2-0905-preview': {'type': 'text'},
+            # video models
+            'jimeng_i2v_first_v30_1080': {'type': 'video', 'display_name': 'Jimeng3.0', 'description': 'Generate high-quality videos using jimeng_i2v_first_v30_1080 model. Supports image-to-video generation with advanced controls.'},
+            # 'kling-v1': {'type': 'video', 'display_name': 'Kling V1', 'description': 'Generate high-quality videos using Kling V1 model. Supports image-to-video generation with advanced controls.'},
+            # 'viduq1': {'type': 'video', 'display_name': 'viduq1', 'description': 'Generate high-quality videos using viduq1model. Supports image-to-video generation with advanced controls.'},
         },
         'url': os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/v1/',
         'api_key': '',

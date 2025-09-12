@@ -50,6 +50,7 @@ from tools.generate_image_by_recraft_v3_replicate import (
 )
 from tools.generate_video_by_hailuo_02_jaaz import generate_video_by_hailuo_02_jaaz
 from tools.generate_video_by_veo3_fast_jaaz import generate_video_by_veo3_fast_jaaz
+from tools.generate_video_by_dynamic_jaaz import DYNAMIC_VIDEO_TOOLS
 from tools.generate_image_by_midjourney_jaaz import generate_image_by_midjourney_jaaz
 from services.config_service import config_service
 from services.db_service import db_service
@@ -133,12 +134,12 @@ TOOL_MAPPING: Dict[str, ToolInfo] = {
     #     "provider": "jaaz",
     #     "tool_function": generate_video_by_hailuo_02_jaaz,
     # },
-    "generate_video_by_kling_v2_jaaz": {
-        "display_name": "Kling",
-        "type": "video",
-        "provider": "jaaz",
-        "tool_function": generate_video_by_kling_v2_jaaz,
-    },
+    # "generate_video_by_kling_v2_jaaz": {
+    #     "display_name": "Kling",
+    #     "type": "video",
+    #     "provider": "jaaz",
+    #     "tool_function": generate_video_by_kling_v2_jaaz,
+    # },
     # "generate_video_by_seedance_v1_pro_volces": {
     #     "display_name": "Doubao Seedance v1 by volces",
     #     "type": "video",
@@ -230,6 +231,9 @@ class ToolService:
             # Register comfyui workflow tools
             if config_service.app_config.get("comfyui", {}).get("url", ""):
                 await register_comfy_tools()
+            
+            # Register dynamic video tools  
+            self.register_dynamic_video_tools()
         except Exception as e:
             print(f"❌ Failed to initialize tool service: {e}")
             traceback.print_stack()
@@ -244,6 +248,16 @@ class ToolService:
     def get_all_tools(self) -> Dict[str, ToolInfo]:
         return self.tools.copy()
 
+    def register_dynamic_video_tools(self):
+        """Register dynamic video tools from DYNAMIC_VIDEO_TOOLS"""
+        for tool_name, tool_info in DYNAMIC_VIDEO_TOOLS.items():
+            self.register_tool(tool_name, {
+                "display_name": tool_info['display_name'],
+                "type": tool_info['type'],
+                "provider": tool_info['provider'],
+                "tool_function": tool_info['tool_function']
+            })
+    
     def clear_tools(self):
         self.tools.clear()
         # 重新注册必须的工具
