@@ -36,6 +36,10 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
             # 'anthropic/claude-sonnet-4': {'type': 'text'},
             # 'anthropic/claude-3.7-sonnet': {'type': 'text'},
             'deepseek-v3-0324': {'type': 'text'},
+            # video models
+            'jimeng_vgfm_t2v_l20': {'type': 'video', 'display_name': 'Jimeng2.0', 'description': 'Generate high-quality videos using Jimeng Vgfm T2V L20 model. Supports image-to-video generation with advanced controls.'},
+            'kling-v1': {'type': 'video', 'display_name': 'Kling V1', 'description': 'Generate high-quality videos using Kling V1 model. Supports image-to-video generation with advanced controls.'},
+            'viduq1': {'type': 'video', 'display_name': 'viduq1', 'description': 'Generate high-quality videos using viduq1model. Supports image-to-video generation with advanced controls.'},
         },
         'url': os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/v1/',
         'api_key': '',

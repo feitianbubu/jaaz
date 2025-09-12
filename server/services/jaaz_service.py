@@ -5,6 +5,8 @@ import aiohttp
 from typing import Dict, Any, Optional, List
 from utils.http_client import HttpClient
 from services.config_service import config_service
+from tools.utils.image_utils import process_input_image
+from tools.utils.upload_utils import upload_image_from_file_path, upload_image_direct
 
 
 class JaazService:
@@ -126,7 +128,28 @@ class JaazService:
             }
 
             if input_images:
-                payload["input_images"] = input_images
+
+                # Process input images (use first image as start_image)
+                first_image = input_images[0]
+                
+                # Handle online file URLs (dynamically get API URL from environment)
+                import os
+                base_api_url = os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/')
+                if first_image.startswith(f'{base_api_url}/v1/files/'):
+                    online_image_url = first_image
+                    print(f"Using existing online image: {online_image_url}")
+                    payload["image"] = online_image_url
+                else:
+                    # Upload local file to online storage
+                    print(f"Uploading local image to online storage: {first_image}")
+                    online_image_url = await upload_image_from_file_path(first_image, self.api_token)
+                    
+                    if not online_image_url:
+                        raise ValueError(
+                            f"Failed to upload input image: {first_image}. Please check if the image exists and is valid.")
+
+                    print(f"✅ Image uploaded successfully, using online URL: {online_image_url}")
+                    payload["image"] = online_image_url
 
             async with session.post(
                 f"{self.api_url}/video/generations",
