@@ -128,28 +128,31 @@ class JaazService:
             }
 
             if input_images:
+                online_image_urls = []
 
-                # Process input images (use first image as start_image)
-                first_image = input_images[0]
-                
                 # Handle online file URLs (dynamically get API URL from environment)
                 import os
                 base_api_url = os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/')
-                if first_image.startswith(f'{base_api_url}/v1/files/'):
-                    online_image_url = first_image
-                    print(f"Using existing online image: {online_image_url}")
-                    payload["image"] = online_image_url
-                else:
-                    # Upload local file to online storage
-                    print(f"Uploading local image to online storage: {first_image}")
-                    online_image_url = await upload_image_from_file_path(first_image, self.api_token)
-                    
-                    if not online_image_url:
-                        raise ValueError(
-                            f"Failed to upload input image: {first_image}. Please check if the image exists and is valid.")
 
-                    print(f"✅ Image uploaded successfully, using online URL: {online_image_url}")
-                    payload["image"] = online_image_url
+                for image_path in input_images:
+                    if image_path.startswith(f'{base_api_url}/v1/files/'):
+                        # Already an online URL
+                        online_image_urls.append(image_path)
+                        print(f"Using existing online image: {image_path}")
+                    else:
+                        # Upload local file to online storage
+                        print(f"Uploading local image to online storage: {image_path}")
+                        online_image_url = await upload_image_from_file_path(image_path, self.api_token)
+                        
+                        if not online_image_url:
+                            raise ValueError(
+                                f"Failed to upload input image: {image_path}. Please check if the image exists and is valid.")
+
+                        online_image_urls.append(online_image_url)
+                        print(f"✅ Image uploaded successfully, using online URL: {online_image_url}")
+
+                # Set the images in payload
+                payload["images"] = online_image_urls
 
             async with session.post(
                 f"{self.api_url}/video/generations",
