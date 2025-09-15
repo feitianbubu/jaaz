@@ -37,7 +37,8 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
             # 'anthropic/claude-3.7-sonnet': {'type': 'text'},
             'kimi-k2-0905-preview': {'type': 'text'},
             # video models
-            'jimeng_i2v_first_v30_1080': {'type': 'video', 'display_name': 'Jimeng3.0', 'description': 'Generate high-quality videos using jimeng_i2v_first_v30_1080 model. Supports image-to-video generation with advanced controls.'},
+            'jimeng_v30': {'type': 'video', 'display_name': 'Jimeng3.0', 'description': 'Generate high-quality videos using jimeng_v30 model. Supports image-to-video generation.'},
+            'jimeng_v30_pro': {'type': 'video', 'display_name': 'Jimeng3.0 Pro', 'description': 'Generate high-quality videos using jimeng_v30_pro model. Supports image-to-video generation with advanced controls.'},
             # 'kling-v1': {'type': 'video', 'display_name': 'Kling V1', 'description': 'Generate high-quality videos using Kling V1 model. Supports image-to-video generation with advanced controls.'},
             # 'viduq1': {'type': 'video', 'display_name': 'viduq1', 'description': 'Generate high-quality videos using viduq1model. Supports image-to-video generation with advanced controls.'},
         },
