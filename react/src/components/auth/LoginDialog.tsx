@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { startDeviceAuth, pollDeviceAuth, saveAuthData } from '../../api/auth'
+import { start99uLogin } from '../../api/auth-99u'
 import { updateJaazApiKey } from '../../api/config'
 import { useAuth } from '../../contexts/AuthContext'
 import { useConfigs, useRefreshModels } from '../../contexts/configs'
@@ -109,11 +110,8 @@ export function LoginDialog() {
     try {
       setAuthMessage(t('common:auth.preparingLoginMessage'))
 
-      const result = await startDeviceAuth()
-      setAuthMessage(result.message)
-
-      // Start polling for authorization status
-      startPolling(result.code)
+      // Use 99U login instead of device authentication
+      start99uLogin()
 
     } catch (error) {
       console.error('登录请求失败:', error)

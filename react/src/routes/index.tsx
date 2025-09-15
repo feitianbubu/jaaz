@@ -3,6 +3,7 @@ import ChatTextarea from '@/components/chat/ChatTextarea'
 import CanvasList from '@/components/home/CanvasList'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useConfigs } from '@/contexts/configs'
+import { useAuth } from '@/contexts/AuthContext'
 import { DEFAULT_SYSTEM_PROMPT } from '@/constants'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -20,7 +21,8 @@ export const Route = createFileRoute('/')({
 function Home() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { setInitCanvas } = useConfigs()
+  const { setInitCanvas, setShowLoginDialog } = useConfigs()
+  const { authStatus } = useAuth()
 
   const { mutate: createCanvasMutation, isPending } = useMutation({
     mutationFn: createCanvas,
@@ -66,6 +68,10 @@ function Home() {
             className='w-full max-w-xl'
             messages={[]}
             onSendMessages={(messages, configs) => {
+              if (!authStatus.is_logged_in) {
+                setShowLoginDialog(true)
+                return
+              }
               createCanvasMutation({
                 name: t('home:newCanvas'),
                 canvas_id: nanoid(),
