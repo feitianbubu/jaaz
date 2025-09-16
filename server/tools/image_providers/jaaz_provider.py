@@ -35,14 +35,15 @@ class JaazImageProvider(ImageProviderBase):
             config = config_service.get_provider_config_for_token('jaaz', token)
         else:
             config = config_service.app_config.get('jaaz', {})
-        
+
         api_url = str(config.get("url", "")).rstrip("/")
-        api_token = str(config.get("api_key", ""))
 
         if not api_url:
-            raise ValueError("Jaaz API URL is not configured")
-        if not api_token:
-            raise ValueError("Jaaz API token is not configured")
+            raise ValueError("Jaaz API URL is not configured. Please set BASE_API_URL environment variable or Jaaz provider URL. Current BASE_API_URL: " + os.getenv('BASE_API_URL', 'not set'))
+
+        if api_url.rstrip('/').endswith('/v1'):
+            return f"{api_url.rstrip('/')}/images/generations"
+
         if api_url.rstrip('/').endswith('/api/v1'):
             return f"{api_url.rstrip('/')}/image/generations"
         else:
@@ -67,6 +68,10 @@ class JaazImageProvider(ImageProviderBase):
         else:
             config = config_service.app_config.get('jaaz', {})
         api_token = str(config.get("api_key", ""))
+
+        # If no api_token found and we have a token parameter, use it as the token
+        if not api_token and token:
+            api_token = token
 
         """Build request headers"""
         return {
@@ -279,6 +284,7 @@ class JaazImageProvider(ImageProviderBase):
                 input_images=input_images,
                 aspect_ratio=aspect_ratio,
                 metadata=metadata,
+                token=token,
                 **kwargs
             )
 
@@ -289,6 +295,7 @@ class JaazImageProvider(ImageProviderBase):
             aspect_ratio=aspect_ratio,
             input_images=input_images,
             metadata=metadata,
+            token=token,
             **kwargs
         )
 
@@ -299,6 +306,7 @@ class JaazImageProvider(ImageProviderBase):
         aspect_ratio: str = "1:1",
         input_images: Optional[list[str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        token: Optional[str] = None,
         **kwargs: Any
     ) -> tuple[str, int, int, str]:
         """Generate Replicate format image"""
@@ -350,6 +358,7 @@ class JaazImageProvider(ImageProviderBase):
         input_images: Optional[list[str]] = None,
         aspect_ratio: str = "1:1",
         metadata: Optional[Dict[str, Any]] = None,
+        token: Optional[str] = None,
         **kwargs: Any
     ) -> tuple[str, int, int, str]:
         """

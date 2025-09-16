@@ -51,6 +51,7 @@ from tools.generate_image_by_recraft_v3_replicate import (
 from tools.generate_video_by_hailuo_02_jaaz import generate_video_by_hailuo_02_jaaz
 from tools.generate_video_by_veo3_fast_jaaz import generate_video_by_veo3_fast_jaaz
 from tools.generate_video_by_dynamic_jaaz import DYNAMIC_VIDEO_TOOLS
+from tools.generate_image_by_dynamic_jaaz import DYNAMIC_IMAGE_TOOLS
 from tools.generate_image_by_midjourney_jaaz import generate_image_by_midjourney_jaaz
 from services.config_service import config_service
 from services.db_service import db_service
@@ -232,8 +233,11 @@ class ToolService:
             if config_service.app_config.get("comfyui", {}).get("url", ""):
                 await register_comfy_tools()
             
-            # Register dynamic video tools  
+            # Register dynamic video tools
             self.register_dynamic_video_tools()
+
+            # Register dynamic image tools
+            self.register_dynamic_image_tools()
         except Exception as e:
             print(f"❌ Failed to initialize tool service: {e}")
             traceback.print_stack()
@@ -257,7 +261,17 @@ class ToolService:
                 "provider": tool_info['provider'],
                 "tool_function": tool_info['tool_function']
             })
-    
+
+    def register_dynamic_image_tools(self):
+        """Register dynamic image tools from DYNAMIC_IMAGE_TOOLS"""
+        for tool_name, tool_info in DYNAMIC_IMAGE_TOOLS.items():
+            self.register_tool(tool_name, {
+                "display_name": tool_info['display_name'],
+                "type": tool_info['type'],
+                "provider": tool_info['provider'],
+                "tool_function": tool_info['tool_function']
+            })
+
     def clear_tools(self):
         self.tools.clear()
         # 重新注册必须的工具

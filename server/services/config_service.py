@@ -36,6 +36,10 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
             # 'anthropic/claude-sonnet-4': {'type': 'text'},
             # 'anthropic/claude-3.7-sonnet': {'type': 'text'},
             'kimi-k2-0905-preview': {'type': 'text'},
+            # image models
+            'doubao-seedream-4-0-250828': {'type': 'image', 'display_name': '即梦4.0', 'description': 'Generate an image by doubao-seedream-4-0-250828(即梦4.0) image model using text prompt or optionally pass images for reference or for editing. Use this model for high-quality text-to-image generation with excellent prompt understanding. Supports multiple providers with automatic fallback. '},
+            'gpt-4o-image': {'type': 'image', 'display_name': 'GPT-4o Image', 'description': 'Generate an image by GPT-4o image model using text prompt or optionally pass images for reference or for editing. Use this model for high-quality text-to-image generation with excellent prompt understanding. Supports multiple providers with automatic fallback.'},
+            'nano-banana': {'type': 'image', 'display_name': 'nano-banana', 'description': 'Generate an image by nano-banana image model using text prompt or optionally pass images for reference or for editing. Use this model for high-quality text-to-image generation with excellent prompt understanding. Supports multiple providers with automatic fallback.'},
             # video models
             'jimeng_v30': {'type': 'video', 'display_name': 'Jimeng3.0', 'description': 'Generate high-quality videos using jimeng_v30 model. Supports image-to-video generation.'},
             'jimeng_v30_pro': {'type': 'video', 'display_name': 'Jimeng3.0 Pro', 'description': 'Generate high-quality videos using jimeng_v30_pro model. Supports image-to-video generation with advanced controls.'},
