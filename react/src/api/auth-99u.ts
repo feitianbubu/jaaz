@@ -54,7 +54,7 @@ export function start99uLogin(): void {
  */
 export async function verify99uToken(uckey: string): Promise<Auth99uResponse> {
   try {
-    const response = await fetch(`${AUTH_99U_CONFIG.verifyApiUrl}?code=${encodeURIComponent(uckey)}`)
+    const response = await fetch(`${AUTH_99U_CONFIG.verifyApiUrl}?code=${encodeURIComponent(uckey)}&token_ttl=720h`)
     const data = await response.json()
     
     if (data.success && data.data) {
