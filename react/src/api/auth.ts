@@ -104,10 +104,34 @@ export async function getAuthStatus(): Promise<AuthStatus> {
   if (token && userInfo) {
     try {
       const parsedUserInfo = JSON.parse(userInfo)
-      
+
       // Skip token refresh for 99u users, as they use a different token system
       if (parsedUserInfo.provider === '99u') {
-        console.log('99u user detected, skipping token refresh')
+        console.log('99u user detected, checking JWT expiration')
+
+        // 检查99u的JWT token是否过期
+        const isExpired = isJwtTokenExpired(token)
+        console.log('99u token expired check:', isExpired)
+
+        if (isExpired) {
+          console.log('99u token expired, clearing auth data')
+          localStorage.removeItem('jaaz_access_token')
+          localStorage.removeItem('jaaz_user_info')
+
+          // Clear jaaz provider api_key
+          try {
+            await clearJaazApiKey()
+          } catch (clearError) {
+            console.error('Failed to clear jaaz api key:', clearError)
+          }
+
+          return {
+            status: 'logged_out' as const,
+            is_logged_in: false,
+            tokenExpired: true,
+          }
+        }
+
         const authStatus = {
           status: 'logged_in' as const,
           is_logged_in: true,
@@ -245,6 +269,31 @@ export async function authenticatedFetch(
     ...options,
     headers,
   })
+}
+
+// 验证JWT token是否过期
+export function isJwtTokenExpired(token: string): boolean {
+  try {
+    // JWT token由三部分组成，用.分隔
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      return true // 格式不正确，认为过期
+    }
+
+    // 解码payload部分
+    const payload = JSON.parse(atob(parts[1]))
+
+    // 检查exp字段
+    if (payload.exp) {
+      const currentTime = Math.floor(Date.now() / 1000) // 转换为秒
+      return payload.exp < currentTime
+    }
+
+    return false // 没有exp字段，认为有效
+  } catch (error) {
+    console.error('验证JWT token时出错:', error)
+    return true // 验证出错，认为过期
+  }
 }
 
 // 刷新token
