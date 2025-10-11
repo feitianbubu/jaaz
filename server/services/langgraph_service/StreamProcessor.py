@@ -59,6 +59,10 @@ class StreamProcessor:
         if not isinstance(oai_messages, list):
             oai_messages = [oai_messages] if oai_messages else []
 
+        print(f"【values】session={self.session_id} 消息条数={len(oai_messages)}")
+        for idx, m in enumerate(oai_messages):
+            if m.get('role') == 'tool':
+                print(f"【tool-msg】#{idx} id={m.get('tool_call_id')} content=[{str(m.get('content'))[:100]}...]")
         # 发送所有消息到前端
         await self.websocket_service(self.session_id, {
             'type': 'all_messages',
@@ -86,6 +90,7 @@ class StreamProcessor:
                 # 工具调用结果之后会在 values 类型中发送到前端，这里会更快出现一些
                 oai_message = convert_to_openai_messages([ai_message_chunk])[0]
                 print('👇toolcall res oai_message', oai_message)
+                print(f"🤖 [tool_call_result] id={ai_message_chunk.tool_call_id} content=[{str(oai_message.get('content'))[:100]}...]")
                 await self.websocket_service(self.session_id, {
                     'type': 'tool_call_result',
                     'id': ai_message_chunk.tool_call_id,
