@@ -130,7 +130,7 @@ class JaazService:
                 "4k": "3840x2160",
                 "1080p": "1920x1080",
                 "720p": "1280x720",
-                "480p": "854x480",
+                # "480p": "854x480",
                 "720x1280": "720x1280",      # Sora竖屏
                 "1792x1024": "1792x1024",    # Sora宽屏
                 "1024x1792": "1024x1792"     # Sora竖屏宽幅
@@ -665,14 +665,11 @@ class JaazService:
                 print(f"🎯 Auto-setting resolution from first image: {resolution}")
             elif resolution is None and not first_img_resolution and image_paths:
                 # 如果没有成功读取到图片分辨率，但确实有图片路径，提供默认分辨率
-                if model and 'sora' in model.lower():
-                    resolution = "1280x720"  # Sora支持的默认分辨率
-                else:
-                    resolution = "480p"  # 其他模型的默认分辨率
+                resolution = "1280x720"  # Sora支持的默认分辨率
                 print(f"🎯 Using default resolution: {resolution} (image reading failed)")
             elif resolution is None:
                 # 没有图片时的默认分辨率
-                resolution = "480p"
+                resolution = "720p"
                 print(f"🎯 Using default resolution for no-image scenario: {resolution}")
 
             task_id = await self._create_openai_video_task(
@@ -800,7 +797,7 @@ class JaazService:
         self,
         prompt: str,
         model: str,
-        resolution: str = "480p",
+        resolution: str = "720p",
         duration: int = 5,
         aspect_ratio: str = "16:9",
         input_images: Optional[List[str]] = None,

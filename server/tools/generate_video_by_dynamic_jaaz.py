@@ -13,7 +13,8 @@ class DynamicVideoInputSchema(BaseModel):
         description="Required. The prompt for video generation. Describe what you want to see in the video."
     )
     input_images: list[str] = Field(
-        description="Required. Images to use as reference or starting frame. Pass a list of image_id here, e.g. ['im_jurheut7.png']. Only the first image will be used as start_image."
+        default_factory=list,
+        description="Optional. Images to use as reference or starting frame. Pass a list of image_id here, e.g. ['im_jurheut7.png']. Only the first image will be used as start_image."
     )
     tool_call_id: Annotated[str, InjectedToolCallId]
 
@@ -34,7 +35,7 @@ def create_video_tool_config(model_name: str, display_name: str, description: st
     # Base schema fields
     schema_fields = {
         'prompt': (str, Field(description="Required. The prompt for video generation. Describe what you want to see in the video.")),
-        'input_images': (list[str], Field(description="Required. Images to use as reference or starting frame. Pass a list of image_id here, e.g. ['im_jurheut7.png']. Only the first image will be used as start_image.")),
+        'input_images': (list[str], Field(default_factory=list, description="Optional. Images to use as reference or starting frame. Pass a list of image_id here, e.g. ['im_jurheut7.png']. Only the first image will be used as start_image.")),
         'tool_call_id': (str, InjectedToolCallId)
     }
 
@@ -80,8 +81,8 @@ def create_dynamic_video_tool(tool_config: Dict[str, Any]):
           args_schema=SchemaClass)
     async def dynamic_video_tool(
         prompt: str,
-        input_images: list[str],
-        config: RunnableConfig,
+        input_images: list[str] = None,
+        config: RunnableConfig = None,
         negative_prompt: str = "",
         guidance_scale: float = 0.5,
         aspect_ratio: str = "16:9",
@@ -104,10 +105,9 @@ def create_dynamic_video_tool(tool_config: Dict[str, Any]):
         ctx['tool_call_id'] = tool_call_id
 
         try:
-            # Validate input_images is provided and not empty
-            if not input_images or len(input_images) == 0:
-                raise ValueError(
-                    "input_images is required and cannot be empty. Please provide at least one image.")
+            # Handle optional input_images - set to empty list if None
+            if input_images is None:
+                input_images = []
 
             # Send start notification
             await send_video_start_notification(

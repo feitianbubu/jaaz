@@ -34,7 +34,7 @@ class VideoProviderBase(ABC):
         self,
         prompt: str,
         model: str,
-        resolution: str = "480p",
+        resolution: str = "720p",
         duration: int = 5,
         aspect_ratio: str = "16:9",
         input_images: Optional[list[str]] = None,
