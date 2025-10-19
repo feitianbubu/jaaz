@@ -274,25 +274,48 @@ export async function authenticatedFetch(
 // 验证JWT token是否过期
 export function isJwtTokenExpired(token: string): boolean {
   try {
+    // 首先检查token是否为空或格式明显不对
+    if (!token || typeof token !== 'string') {
+      return true // 无效token，认为过期
+    }
+
     // JWT token由三部分组成，用.分隔
     const parts = token.split('.')
     if (parts.length !== 3) {
-      return true // 格式不正确，认为过期
+      console.log('JWT token格式不正确，不是三部分组成')
+      return false // 格式不正确，先认为没过期，避免误伤
     }
 
-    // 解码payload部分
-    const payload = JSON.parse(atob(parts[1]))
+    // 检查payload部分是否存在且非空
+    if (!parts[1]) {
+      console.log('JWT token payload为空')
+      return false // payload为空，认为有效
+    }
+
+    // 解码payload部分 - 添加对atob的安全处理
+    let payload: any
+    try {
+      // 尝试解码Base64 URL编码（JWT standard）
+      const base64Payload = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+      payload = JSON.parse(atob(base64Payload))
+    } catch (decodeError) {
+      console.log('JWT token解码失败，可能不是标准JWT格式:', decodeError)
+      return false // 解码失败，认为token有效，避免误伤99u用户的非JWT token
+    }
 
     // 检查exp字段
-    if (payload.exp) {
+    if (payload && payload.exp) {
       const currentTime = Math.floor(Date.now() / 1000) // 转换为秒
-      return payload.exp < currentTime
+      const isExpired = payload.exp < currentTime
+      console.log('JWT token过期检查:', { exp: payload.exp, currentTime, isExpired })
+      return isExpired
     }
 
+    console.log('JWT token没有exp字段，认为有效')
     return false // 没有exp字段，认为有效
   } catch (error) {
     console.error('验证JWT token时出错:', error)
-    return true // 验证出错，认为过期
+    return false // 验证出错，认为有效，避免误伤用户
   }
 }
 
