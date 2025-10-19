@@ -90,7 +90,10 @@ class OpenAIVideoHttpClient:
                 "4k": "3840x2160",
                 "1080p": "1920x1080",
                 "720p": "1280x720",
-                "480p": "854x480"
+                "480p": "854x480",
+                "720x1280": "720x1280",      # Sora竖屏
+                "1792x1024": "1792x1024",    # Sora宽屏
+                "1024x1792": "1024x1792"     # Sora竖屏宽幅
             }
             if resolution in resolution_map:
                 form_data.add_field('size', resolution_map[resolution])

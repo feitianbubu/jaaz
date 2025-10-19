@@ -130,7 +130,10 @@ class JaazService:
                 "4k": "3840x2160",
                 "1080p": "1920x1080",
                 "720p": "1280x720",
-                "480p": "854x480"
+                "480p": "854x480",
+                "720x1280": "720x1280",      # Sora竖屏
+                "1792x1024": "1792x1024",    # Sora宽屏
+                "1024x1792": "1024x1792"     # Sora竖屏宽幅
             }
             if resolution in resolution_map:
                 video_config["size"] = resolution_map[resolution]
@@ -208,10 +211,18 @@ class JaazService:
                 print(f"📋 Video status: {video.status}")
 
                 if video.status in ("succeeded", "completed"):
-                    # 新版 SDK 把地址放在 metadata.url
-                    real_url = getattr(video, "url", None) or video.metadata.get("url")
+                    # 获取视频结果 URL - 尝试多个可能的属性位置
+                    real_url = (getattr(video, "url", None) or
+                               getattr(video, "metadata", {}).get("url") if hasattr(video, "metadata") else None or
+                               getattr(video, "result", {}).get("url") if hasattr(video, "result") else None)
+
+                    # 如果没有找到 URL，使用默认规则构建视频地址
                     if not real_url:
-                        raise Exception("Video completed but no url found")
+                        # 构建默认的视频播放地址: {base_url}/v1/videos/{task_id}
+                        base_url = self.api_url.rstrip('/')
+                        real_url = f"{base_url}/videos/{task_id}/content"
+                        print(f"📝 Using default video URL pattern: {real_url}")
+
                     print(f"✅ Video generation completed: {real_url}")
                     return {'status': 'succeeded', 'result_url': real_url}
                 elif video.status == "failed":
@@ -598,6 +609,71 @@ class JaazService:
             print(f"✅ Total {len(image_paths)} images ready for video generation")
             if image_paths:
                 print(f"   Image paths: {image_paths}")
+
+            # 🎯 图像分辨率处理 (对所有模型) + Sora特定验证
+            first_img_resolution = None  # 用于记录第一张图片的分辨率
+
+            # 优先读取所有图片的分辨率信息
+            if image_paths:
+                print("🔍 Reading input image resolutions...")
+                for i, img_path in enumerate(image_paths):
+                    try:
+                        from PIL import Image
+                        with Image.open(img_path) as img:
+                            img_size = f"{img.width}x{img.height}"
+                            print(f"   📊 Image {i+1}: {img_path} -> {img_size}")
+
+                            # 记录第一张图片的分辨率
+                            if i == 0:
+                                first_img_resolution = img_size
+                    except Exception as e:
+                        print(f"⚠️  Error reading image resolution for {img_path}: {e}")
+                        continue
+
+            # Sora模型特定验证
+            if model and 'sora' in model.lower():
+                # Sora duration validation
+                if duration is not None:
+                    allowed_durations = [4, 8, 12]
+                    if duration not in allowed_durations:
+                        error_msg = f"❌ Duration {duration} is not supported by {model}. Allowed durations: {allowed_durations}"
+                        print(error_msg)
+                        if session_id:
+                            await send_video_error_notification(session_id, error_msg)
+                        raise ValueError(error_msg)
+                    else:
+                        print(f"✅ Duration {duration} is valid for {model}")
+
+                # Sora image分辨率验证
+                if first_img_resolution:
+                    SORA_VALID_RESOLUTIONS = {"720x1280", "1280x720", "1792x1024", "1024x1792"}
+                    print("🔍 Validating image resolution for Sora...")
+
+                    if first_img_resolution not in SORA_VALID_RESOLUTIONS:
+                        valid_formats = ", ".join(sorted(SORA_VALID_RESOLUTIONS))
+                        error_msg = f"❌ Image resolution {first_img_resolution} is not supported by Sora. Valid resolutions: {valid_formats}"
+                        print(error_msg)
+                        if session_id:
+                            await send_video_error_notification(session_id, error_msg)
+                        raise ValueError(error_msg)
+                    else:
+                        print(f"   ✅ {first_img_resolution} is valid for Sora")
+
+            # 自动设置分辨率逻辑
+            if resolution is None and first_img_resolution:
+                resolution = first_img_resolution
+                print(f"🎯 Auto-setting resolution from first image: {resolution}")
+            elif resolution is None and not first_img_resolution and image_paths:
+                # 如果没有成功读取到图片分辨率，但确实有图片路径，提供默认分辨率
+                if model and 'sora' in model.lower():
+                    resolution = "1280x720"  # Sora支持的默认分辨率
+                else:
+                    resolution = "480p"  # 其他模型的默认分辨率
+                print(f"🎯 Using default resolution: {resolution} (image reading failed)")
+            elif resolution is None:
+                # 没有图片时的默认分辨率
+                resolution = "480p"
+                print(f"🎯 Using default resolution for no-image scenario: {resolution}")
 
             task_id = await self._create_openai_video_task(
                 prompt=prompt,

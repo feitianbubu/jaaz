@@ -22,7 +22,15 @@ def create_video_tool_config(model_name: str, display_name: str, description: st
                            default_params: Dict[str, Any] = None) -> Dict[str, Any]:
     """Create dynamic video tool configuration"""
     default_params = default_params or {}
-    
+
+    # Get model-specific duration config
+    duration_config = default_params.get('duration_config', {})
+    default_duration = duration_config.get('default', 5)
+    duration_description = duration_config.get('description', f"Optional. The duration of the video in seconds. Use {default_duration} by default.")
+
+    # Filter out non-parameters from default_params (keep only actual tool parameters)
+    filtered_default_params = {k: v for k, v in default_params.items() if k not in ['type', 'display_name', 'description', 'duration_config']}
+
     # Base schema fields
     schema_fields = {
         'prompt': (str, Field(description="Required. The prompt for video generation. Describe what you want to see in the video.")),
@@ -34,7 +42,7 @@ def create_video_tool_config(model_name: str, display_name: str, description: st
         'negative_prompt': (str, Field(default="", description="Optional. Negative prompt to specify what you don't want in the video.")),
         'guidance_scale': (float, Field(default=0.5, description="Optional. Guidance scale for generation (0.0 to 1.0). Higher values follow the prompt more closely.")),
         'aspect_ratio': (str, Field(default="16:9", description="Optional. The aspect ratio of the video. Allowed values: 1:1, 16:9, 4:3, 21:9")),
-        'duration': (int, Field(default=5, description="Optional. The duration of the video in seconds. Use 5 by default. Allowed values: 5, 10."))
+        'duration': (int, Field(default=default_duration, description=duration_description))
     })
     
     # Create dynamic schema
@@ -48,7 +56,7 @@ def create_video_tool_config(model_name: str, display_name: str, description: st
         'display_name': display_name,
         'description': description,
         'schema': DynamicSchema,
-        'default_params': default_params
+        'default_params': filtered_default_params
     }
 
 
@@ -59,10 +67,14 @@ def create_dynamic_video_tool(tool_config: Dict[str, Any]):
     description = tool_config['description']
     SchemaClass = tool_config['schema']
     default_params = tool_config.get('default_params', {})
-    
+
     tool_name = f"generate_video_by_{model_name.replace('-', '_').replace('.', '_')}_jaaz"
     tool_config['tool_name'] = tool_name
-    
+
+    # Get model-specific duration default from config
+    duration_config = default_params.get('duration_config', {})
+    default_duration = duration_config.get('default', 5)
+
     @tool(tool_name,
           description=description,
           args_schema=SchemaClass)
@@ -73,7 +85,7 @@ def create_dynamic_video_tool(tool_config: Dict[str, Any]):
         negative_prompt: str = "",
         guidance_scale: float = 0.5,
         aspect_ratio: str = "16:9",
-        duration: int = 5,
+        duration: int = default_duration,
         **kwargs
     ) -> str:
         """
@@ -171,7 +183,7 @@ def get_video_model_configs() -> Dict[str, Dict[str, Any]]:
                     model_name=model_name,
                     display_name=display_name,
                     description=description,
-                    default_params=model_config.get('default_params', {})
+                    default_params=model_config
                 )
     
     # Add default video models if not in config

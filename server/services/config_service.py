@@ -45,7 +45,16 @@ DEFAULT_PROVIDERS_CONFIG: AppConfig = {
             'jimeng_v30_pro': {'type': 'video', 'display_name': 'Jimeng3.0 Pro', 'description': 'Generate high-quality videos using jimeng_v30_pro model. Supports image-to-video generation with advanced controls.'},
             # 'kling-v1': {'type': 'video', 'display_name': 'Kling V1', 'description': 'Generate high-quality videos using Kling V1 model. Supports image-to-video generation with advanced controls.'},
             'viduq1': {'type': 'video', 'display_name': 'viduq1', 'description': 'Generate high-quality videos using viduq1model. Supports image-to-video generation with advanced controls.'},
-            'sora-2': {'type': 'video', 'display_name': 'sora-2', 'description': 'Generate high-quality videos using sora-2. Supports image-to-video generation with advanced controls.'},
+            'sora-2': {
+                'type': 'video',
+                'display_name': 'sora-2',
+                'description': 'Generate high-quality videos using sora-2. Supports image-to-video generation with advanced controls.',
+                'duration_config': {
+                    'default': 4,
+                    'allowed_values': [4, 8, 12],
+                    'description': "Optional. The duration of the video in seconds. Use 4 by default. Allowed values: 4, 8, 12."
+                }
+            },
         },
         'url': os.getenv('BASE_API_URL', 'https://jaaz.app').rstrip('/') + '/v1/',
         'api_key': '',
