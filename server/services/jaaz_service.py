@@ -339,7 +339,7 @@ class JaazService:
 
                 # Handle online file URLs (dynamically get API URL from environment)
                 import os
-                base_api_url = os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/')
+                base_api_url = os.getenv('BASE_API_URL', 'https://dev.clinx.work').rstrip('/')
 
                 for image_path in input_images:
                     if image_path.startswith(f'{base_api_url}/v1/files/'):

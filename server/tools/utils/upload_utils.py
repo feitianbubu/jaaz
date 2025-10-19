@@ -38,7 +38,7 @@ async def upload_image_to_clinx(image_data: str, api_token: str = '') -> Optiona
         
         try:
             # Get API URL from environment variable
-            base_api_url = os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/')
+            base_api_url = os.getenv('BASE_API_URL', 'https://dev.clinx.work').rstrip('/')
             upload_url = f"{base_api_url}/v1/files"
             
             with open(tmp_file_path, 'rb') as f:
@@ -119,7 +119,7 @@ async def upload_image_direct(file_path: str, api_token: str = '') -> Optional[s
             return None
         
         # Get API URL from environment variable
-        base_api_url = os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/')
+        base_api_url = os.getenv('BASE_API_URL', 'https://dev.clinx.work').rstrip('/')
         upload_url = f"{base_api_url}/v1/files"
         
         # Determine file extension
@@ -203,7 +203,7 @@ async def upload_image_from_file_path(file_path: str, api_token: str = '') -> Op
             return None
         
         # Get API URL from environment variable
-        base_api_url = os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/')
+        base_api_url = os.getenv('BASE_API_URL', 'https://dev.clinx.work').rstrip('/')
         upload_url = f"{base_api_url}/v1/files"
         
         # Determine file extension
@@ -272,7 +272,7 @@ async def upload_image_from_file_path(file_path: str, api_token: str = '') -> Op
         print(f"Uploading image file from: {full_path}")
         
         # Get API URL from environment variable
-        base_api_url = os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/')
+        base_api_url = os.getenv('BASE_API_URL', 'https://dev.clinx.work').rstrip('/')
         upload_url = f"{base_api_url}/v1/files"
         
         # Determine file extension for naming

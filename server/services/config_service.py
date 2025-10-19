@@ -121,7 +121,7 @@ class ConfigService:
 
     def _get_jaaz_url(self) -> str:
         """Get the correct jaaz URL"""
-        return os.getenv('BASE_API_URL', 'https://newapi.clinx.work').rstrip('/') + '/v1/'
+        return os.getenv('BASE_API_URL', 'https://dev.clinx.work').rstrip('/') + '/v1/'
 
     async def initialize(self) -> None:
         try:
